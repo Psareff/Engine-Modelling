@@ -1,9 +1,8 @@
 #pragma once
-
-struct EngineCondition
+struct EngineCharacteristics
 {
-	double temp_, 
-		crankshaft_speed_, 
-		moment_of_inertia_, 
-		acceleration_;
+	double moment_of_inertia,
+		heating_from_torque_coef,
+		heating_from_speed_coef,
+		cooling_from_ambient_coef;
 };
