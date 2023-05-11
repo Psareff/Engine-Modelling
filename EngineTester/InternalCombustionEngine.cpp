@@ -1,24 +1,41 @@
-#include "IEngine.hpp"
-#include "TorqueFromSpeed.hpp"
-#include "EngineCharacteristics.hpp"
+#include "InternalCombustionEngine.hpp"
 
-class InternalCombustionEngine : IEngine
+#define M engine_condition_.torque
+#define V engine_condition_.crankshaft_speed
+#define Tcur engine_condition_.temp
+#define a engine_condition_.acceleration
+
+#define J engine_characteristics_.moment_of_inertia
+#define Hm engine_characteristics_.heating_from_torque_coef
+#define Hv engine_characteristics_.heating_from_speed_coef
+#define C engine_characteristics_.cooling_from_ambient_coef
+#define Tmax engine_characteristics_.overheat_temperature
+
+#define Tamb ambient_temperature_
+
+InternalCombustionEngine::InternalCombustionEngine(
+	EngineCharacteristics engine_characteristics,
+	TorqueFromSpeed torque_from_speed,
+	double ambient_temperature)
+	:
+	engine_characteristics_(engine_characteristics),
+	torque_from_speed_(torque_from_speed),
+	ambient_temperature_(ambient_temperature) {}
+
+void InternalCombustionEngine::ResetEngine()
 {
-public: 
-	InternalCombustionEngine(
-		EngineCharacteristics engine_characteristics,
-		TorqueFromSpeed torque_from_speed)
-		: 
-		engine_characteristics_(engine_characteristics),
-		torque_from_speed_(torque_from_speed) {}
+	Tcur = ambient_temperature_;
+	V = 0.0;
+	M = 0.0;
+	a = 0.0;
+}
 
-	EngineCondition getEngineCondition() const override
-	{
-		return engine_condition_;
-	}
-	~InternalCombustionEngine() override {};
-private:
-	EngineCharacteristics engine_characteristics_;
-	EngineCondition engine_condition_;
-	TorqueFromSpeed torque_from_speed_;
-};
+void InternalCombustionEngine::Run(double step)
+{
+	V += step * a;
+	M = torque_from_speed_(V);
+	a = M / J;
+	Tcur = (M * Hm + pow(V, 2) * Hv) - (C * (Tamb - Tcur));
+}
+
+InternalCombustionEngine::~InternalCombustionEngine() {};

@@ -149,6 +149,7 @@
     <ClInclude Include="EngineCharacteristics.hpp" />
     <ClInclude Include="EngineCondition.hpp" />
     <ClInclude Include="IEngine.hpp" />
+    <ClInclude Include="InternalCombustionEngine.hpp" />
     <ClInclude Include="TorqueFromSpeed.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

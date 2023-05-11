@@ -1,35 +1,34 @@
 #include <iostream>
-#include <vector>
+#include <map>
+#include<windows.h>
 
-#include "EngineCondition.hpp"
-#include "TorqueFromSpeed.cpp"
+#include "InternalCombustionEngine.hpp"
 
 int main()
 {
 #pragma region initial_values
-	double inertia_moment = 10;
-	std::vector<std::pair<double, double>> dependence_of_torque_of_crankshaft_speed = { {20, 0},{75, 75},{100, 150},{105, 200},{75, 250}, {0, 300} };
-	double overheat_temperature = 110;
-	double dependence_of_heating_on_torque = 0.1;
-	double dependence_of_heating_on_crankshaft_speed = 0.0001;
-	double cooling_coefficient = 0.1;
 
-
-	double ambient_temperature = 25;
-
-	double current_speed = 0;
-	double current_temperature = ambient_temperature;
-	double current_crankshaft_speed = 0;
+	TorqueFromSpeed tfs( { {20, 0}, {75, 75}, {100, 150}, {105, 200}, {75, 250}, {0, 300} });
+	EngineCharacteristics ec;
+	ec.moment_of_inertia = 10;
+	ec.heating_from_speed_coef = 0.0001;
+	ec.heating_from_torque_coef = 0.1;
+	ec.cooling_from_ambient_coef = 0.1;
+	ec.overheat_temperature = 110;
 
 #pragma endregion
-
-	TorqueFromSpeed* a = new TorqueFromSpeed({ {0, 20}, {75, 75}, {150, 100}, {200, 105}, {250, 75}, {300, 0} });
-	
-	try {
-		std::cout << (*a)(143) << " ";
-	}
-
-	catch (std::invalid_argument& e) {
-		std::cerr << e.what();
+	double ambient_temperature;
+	std::cin >> ambient_temperature;
+	IEngine* engine = new InternalCombustionEngine(ec, tfs, ambient_temperature);
+	engine->ResetEngine();
+	for (int i = 0; i < 100; i += 0.01)
+	{
+		engine->Run(0.01);
+		std::cout << "Crankshaft speed: ";
+		std::cout << engine->getEngineCondition().crankshaft_speed << std::endl;
+		std::cout << "Temp: ";
+		std::cout << engine->getEngineCondition().temp << std::endl;
+		Sleep(5);
+		system("cls");
 	}
 }
